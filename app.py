@@ -65,6 +65,18 @@ def get_transactions_api(input: Transactions):
         print(traceback.format_exc())
         print(sys.exc_info()[2])
         return APIResponse.json_format(response)  
+    
+@app.post('/get_transactions_latest', tags=["get_transactions"])
+def get_transactions_api(input: LoginDetails):
+    try:
+        ncb = NCB(input.username,input.password,input.account_number,input.proxy_list)
+        history = ncb.get_transactions_latest()
+        return APIResponse.json_format(history)
+    except Exception as e:
+        response = str(e)
+        print(traceback.format_exc())
+        print(sys.exc_info()[2])
+        return APIResponse.json_format(response)  
 
 
 if __name__ == "__main__":

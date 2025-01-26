@@ -20,7 +20,8 @@ class NCB:
             'captcha':'https://www.ncb-bank.vn/nganhangso.khcn/gateway-server/personal-user-service/captcha',
             'login':'https://www.ncb-bank.vn/nganhangso.khcn/gateway-server/oauth/token',
             'account_info': lambda account_number :f'https://www.ncb-bank.vn/nganhangso.khcn/gateway-server/personal-account-service/account/current/{account_number}?bnkid=&brncode=',
-            'transactions': lambda account_number,from_date,to_date,page : f'https://www.ncb-bank.vn/nganhangso.khcn/gateway-server/personal-account-service/account/{account_number}/search?keyword=&fromDate={from_date}&toDate={to_date}&page={page}'
+            'transactions': lambda account_number,from_date,to_date,page : f'https://www.ncb-bank.vn/nganhangso.khcn/gateway-server/personal-account-service/account/{account_number}/search?keyword=&fromDate={from_date}&toDate={to_date}&page={page}',
+            'transactions_2': 'https://www.ncb-bank.vn/nganhangso.khcn/gateway-server/personal-account-service/dashboard/recent-transaction'
         }
         if self.proxy_list:
             self.proxy_info = self.proxy_list.pop(0)
@@ -265,6 +266,27 @@ class NCB:
                     "data":response,
                     "message": "Unknow Error!"
                 }
+    def get_transactions_latest(self):
+        if not self.is_login or time.time() - self.time_login > 299:
+            login = self.handleLogin()
+            if not login['success']:
+                return login
+        response = self.curl_get(self.url['transactions_2'])
+        if 'code' in response and response['code'] == 200 and 'data' in response and response['data']:
+            return {'code':200,'success': True, 'message': 'Thành công',
+                            'data':{
+                                'transactions':response['data'],
+                    }}
+        elif 'code' in response and response['code'] == 6100:
+            return {'code':404,'success': False, 'message': 'account_number not found!'} 
+        else:
+            return  {
+                    "success": False,
+                    "code": 500,
+                    "data":response,
+                    "message": "Unknow Error!"
+                }
+
     def handleLogin(self):
         captchaText = self.getCaptcha()
         session_raw = self.login(captchaText)
