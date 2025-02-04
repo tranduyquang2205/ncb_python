@@ -272,6 +272,7 @@ class NCB:
             if not login['success']:
                 return login
         response = self.curl_get(self.url['transactions_2'])
+        
         if 'code' in response and response['code'] == 200 and 'data' in response and response['data']:
             return {'code':200,'success': True, 'message': 'Thành công',
                             'data':{
